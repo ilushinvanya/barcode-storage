@@ -59,20 +59,21 @@ const stopCamera = () => {
 const detectBarcode = async () => {
     if (!videoRef.value || !canvasRef.value || !isSupported()) return;
 
-	console.log('detectBarcode')
     const video = videoRef.value;
     const canvas = canvasRef.value;
     const context = canvas.getContext('2d');
 
+	console.log('context')
     if (!context) return;
 
     const detect = async () => {
+		console.log('video.videoWidth', video.videoWidth)
+		console.log('scanning.value', scanning.value)
         if (!scanning.value || !video.videoWidth) return;
 
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         context.drawImage(video, 0, 0);
-		console.log('detect')
         try {
             const BarcodeDetectorClass = window.BarcodeDetector;
             if (!BarcodeDetectorClass) {
