@@ -63,11 +63,9 @@ const detectBarcode = async () => {
     const canvas = canvasRef.value;
     const context = canvas.getContext('2d');
 
-	console.log('context')
     if (!context) return;
 
     const detect = async () => {
-		console.log('video', video)
         if (!scanning.value || !video) return;
 
         canvas.width = video.videoWidth;
@@ -83,14 +81,12 @@ const detectBarcode = async () => {
             });
 
             const barcodes = await barcodeDetector.detect(canvas);
-			console.log(canvas)
-			console.log(barcodes)
             if (barcodes.length > 0) {
                 const detected = barcodes[0];
                 if (detected) {
                     code.value = detected.rawValue;
                     format.value = detected.format;
-                    stopCamera();
+                    // stopCamera();
                 }
             } else if (scanning.value) {
                 requestAnimationFrame(detect);
