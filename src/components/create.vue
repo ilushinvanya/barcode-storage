@@ -30,7 +30,7 @@ const startCamera = async () => {
             video: { facingMode: 'environment' }
         });
         stream.value = mediaStream;
-        
+
         if (videoRef.value) {
             videoRef.value.srcObject = mediaStream;
             videoRef.value.play();
@@ -82,7 +82,8 @@ const detectBarcode = async () => {
             });
 
             const barcodes = await barcodeDetector.detect(canvas);
-            
+			console.log(canvas)
+			console.log(barcodes)
             if (barcodes.length > 0) {
                 const detected = barcodes[0];
                 if (detected) {
@@ -108,7 +109,7 @@ const detectBarcode = async () => {
 const scanFromImage = async (event: Event) => {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    
+
     if (!file || !isSupported()) {
         error.value = 'Barcode Detection API не поддерживается';
         return;
@@ -118,15 +119,15 @@ const scanFromImage = async (event: Event) => {
         error.value = '';
         const imageUrl = URL.createObjectURL(file);
         const img = new Image();
-        
+
         img.onload = async () => {
             if (!canvasRef.value) return;
-            
+
             const canvas = canvasRef.value;
             const context = canvas.getContext('2d');
-            
+
             if (!context) return;
-            
+
             canvas.width = img.width;
             canvas.height = img.height;
             context.drawImage(img, 0, 0);
@@ -141,7 +142,7 @@ const scanFromImage = async (event: Event) => {
                 });
 
                 const barcodes = await barcodeDetector.detect(canvas);
-                
+
                 if (barcodes.length > 0) {
                     const detected = barcodes[0];
                     if (detected) {
@@ -155,10 +156,10 @@ const scanFromImage = async (event: Event) => {
                 error.value = 'Ошибка при сканировании изображения';
                 console.error(err);
             }
-            
+
             URL.revokeObjectURL(imageUrl);
         };
-        
+
         img.src = imageUrl;
     } catch (err) {
         error.value = 'Ошибка при загрузке изображения';
@@ -183,13 +184,13 @@ const save = () => {
             code: code.value,
             format: format.value,
         });
-        
+
         // Сброс формы
         name.value = '';
         code.value = '';
         format.value = '';
         error.value = '';
-        
+
         // Возврат к списку
         emit('saved');
     } catch (err) {
