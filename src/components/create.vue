@@ -68,7 +68,7 @@ const detectBarcode = async () => {
 
     const detect = async () => {
 		console.log('video', video)
-        if (!scanning.value || !video.videoWidth) return;
+        if (!scanning.value || !video) return;
 
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
