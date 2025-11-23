@@ -13,6 +13,7 @@ const barcodeSvgRef = ref<SVGSVGElement | null>(null);
 const isEditing = ref(false);
 const editName = ref('');
 const error = ref('');
+const successMessage = ref('');
 
 const renderBarcode = async () => {
     await nextTick();
@@ -115,6 +116,66 @@ const handleDelete = () => {
     }
 };
 
+const handleExport = async () => {
+    try {
+        const exportData = {
+            name: props.barcode.name,
+            format: props.barcode.format,
+            code: props.barcode.code
+        };
+        const jsonString = JSON.stringify(exportData, null, 2);
+
+        // Пытаемся использовать Web Share API
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: `Штрихкод: ${props.barcode.name}`,
+                    text: jsonString
+                });
+                return;
+            } catch (shareErr) {
+                // Если пользователь отменил шаринг, просто продолжаем с копированием
+                if ((shareErr as Error).name !== 'AbortError') {
+                    console.error('Ошибка при шаринге:', shareErr);
+                }
+            }
+        }
+
+        // Fallback: копирование в буфер обмена
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(jsonString);
+            error.value = '';
+            successMessage.value = 'Штрихкод скопирован в буфер обмена';
+            setTimeout(() => {
+                successMessage.value = '';
+            }, 3000);
+        } else {
+            // Старый способ для старых браузеров
+            const textArea = document.createElement('textarea');
+            textArea.value = jsonString;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                error.value = '';
+                successMessage.value = 'Штрихкод скопирован в буфер обмена';
+                setTimeout(() => {
+                    successMessage.value = '';
+                }, 3000);
+            } catch (err) {
+                error.value = 'Не удалось скопировать в буфер обмена';
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+    } catch (err) {
+        error.value = 'Ошибка при экспорте';
+        console.error('Ошибка экспорта:', err);
+    }
+};
+
 const emit = defineEmits<{
     deleted: [];
     updated: [];
@@ -136,11 +197,25 @@ watch(() => props.barcode, () => {
             {{ error }}
         </div>
 
+        <!-- Успешные сообщения -->
+        <div v-if="successMessage" class="mb-3 p-2 bg-green-100 border border-green-400 text-green-700 text-sm rounded">
+            {{ successMessage }}
+        </div>
+
         <!-- Название -->
         <div class="mb-4">
             <div v-if="!isEditing" class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-800">{{ barcode.name }}</h3>
                 <div class="flex gap-2">
+                    <button
+                        @click="handleExport"
+                        class="p-2 text-green-600 hover:bg-green-50 rounded transition"
+                        title="Экспорт"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                    </button>
                     <button
                         @click="startEdit"
                         class="p-2 text-blue-600 hover:bg-blue-50 rounded transition"

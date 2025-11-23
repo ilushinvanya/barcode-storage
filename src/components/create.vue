@@ -11,6 +11,7 @@ const fileInputRef = ref<HTMLInputElement | null>(null);
 const stream = ref<MediaStream | null>(null);
 const scanning = ref(false);
 const error = ref('');
+const importJson = ref('');
 
 // Проверка поддержки Barcode Detection API
 const isSupported = () => {
@@ -164,6 +165,37 @@ const scanFromImage = async (event: Event) => {
     }
 };
 
+// Импорт штрихкода из JSON
+const importBarcode = () => {
+    if (!importJson.value.trim()) {
+        error.value = 'Вставьте JSON строку';
+        return;
+    }
+
+    try {
+        const parsed = JSON.parse(importJson.value.trim());
+        
+        // Проверяем наличие обязательных полей
+        if (typeof parsed.name !== 'string' || typeof parsed.code !== 'string' || typeof parsed.format !== 'string') {
+            error.value = 'Неверный формат JSON. Ожидаются поля: name, code, format';
+            return;
+        }
+
+        // Заполняем поля
+        name.value = parsed.name;
+        code.value = parsed.code;
+        format.value = parsed.format;
+        importJson.value = '';
+        error.value = '';
+
+        // Прокручиваем к форме для просмотра импортированных данных
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+        error.value = 'Ошибка при парсинге JSON. Проверьте формат данных';
+        console.error('Ошибка импорта:', err);
+    }
+};
+
 // Сохранение штрихкода
 const save = () => {
     if (!name.value.trim()) {
@@ -186,6 +218,7 @@ const save = () => {
         name.value = '';
         code.value = '';
         format.value = '';
+        importJson.value = '';
         error.value = '';
 
         // Возврат к списку
@@ -235,6 +268,30 @@ onUnmounted(() => {
             <div v-if="error" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
                 {{ error }}
             </div>
+
+            <!-- Импорт из JSON -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Импорт из JSON
+                </label>
+                <div class="flex gap-2">
+                    <textarea
+                        v-model="importJson"
+                        placeholder='Вставьте JSON строку: {"name":"Название","format":"qr_code","code":"123456"}'
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-mono text-sm"
+                        rows="3"
+                    ></textarea>
+                    <button
+                        @click="importBarcode"
+                        :disabled="!importJson.trim()"
+                        class="bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition whitespace-nowrap"
+                    >
+                        Импорт
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-center text-gray-600 mb-4">или</div>
 
             <!-- Камера -->
             <div class="mb-6">
