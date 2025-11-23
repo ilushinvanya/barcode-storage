@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, nextTick } from 'vue';
 import JsBarcode from 'jsbarcode';
+import QRCode from 'qrcode';
 import { editBarcode, deleteBarcode } from '../barcode';
 import type { Barcode } from '../barcode';
 
@@ -20,15 +21,41 @@ const renderBarcode = async () => {
             // Очистка предыдущего содержимого
             barcodeSvgRef.value.innerHTML = '';
             
-            // Рендеринг штрихкода
-            JsBarcode(barcodeSvgRef.value, props.barcode.code, {
-                format: mapFormat(props.barcode.format),
-                width: 2,
-                height: 80,
-                displayValue: true,
-                fontSize: 14,
-                margin: 10,
-            });
+            // Проверяем, является ли формат QR кодом
+            const format = props.barcode.format.toLowerCase();
+            if (format === 'qr_code') {
+                // Используем node-qrcode для генерации QR кода
+                const svgString = await QRCode.toString(props.barcode.code, {
+                    type: 'svg',
+                    width: 300,
+                    margin: 2,
+                    color: {
+                        dark: '#000000',
+                        light: '#FFFFFF'
+                    }
+                });
+                // Парсим SVG строку и извлекаем содержимое
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(svgString, 'image/svg+xml');
+                const svgElement = svgDoc.querySelector('svg');
+                if (svgElement) {
+                    // Копируем атрибуты и содержимое в существующий SVG элемент
+                    barcodeSvgRef.value.setAttribute('viewBox', svgElement.getAttribute('viewBox') || '');
+                    barcodeSvgRef.value.setAttribute('width', svgElement.getAttribute('width') || '300');
+                    barcodeSvgRef.value.setAttribute('height', svgElement.getAttribute('height') || '300');
+                    barcodeSvgRef.value.innerHTML = svgElement.innerHTML;
+                }
+            } else {
+                // Используем JsBarcode для остальных форматов
+                JsBarcode(barcodeSvgRef.value, props.barcode.code, {
+                    format: mapFormat(props.barcode.format),
+                    width: 2,
+                    height: 80,
+                    displayValue: true,
+                    fontSize: 14,
+                    margin: 10,
+                });
+            }
         } catch (err) {
             console.error('Ошибка рендеринга штрихкода:', err);
         }
@@ -38,7 +65,6 @@ const renderBarcode = async () => {
 // Маппинг форматов из Barcode Detection API в JsBarcode
 const mapFormat = (format: string): string => {
     const formatMap: Record<string, string> = {
-        'qr_code': 'CODE128', // JsBarcode не поддерживает QR, используем CODE128
         'ean_13': 'EAN13',
         'ean_8': 'EAN8',
         'code_128': 'CODE128',
