@@ -4,6 +4,10 @@ import { loadBarcodes } from '../barcode';
 import type { Barcode } from '../barcode';
 import Item from './item.vue';
 
+// URL репозитория GitHub (можно настроить через переменную окружения)
+const GITHUB_REPO_URL = import.meta.env.VITE_GITHUB_REPO_URL || 'https://github.com/ilushinvanya/barcode-storage';
+const README_URL = `${GITHUB_REPO_URL}/blob/main/README.md`;
+
 const barcodes = ref<Barcode[]>([]);
 const selectedBarcodeId = ref<string | null>(null);
 
@@ -34,7 +38,14 @@ onMounted(() => {
         <!-- Заголовок -->
         <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
             <div class="max-w-md mx-auto px-4 py-4 flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-gray-800">Штрихкоды</h1>
+                <a
+                    :href="README_URL"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-2xl font-bold text-gray-800 hover:text-blue-600 transition-colors"
+                >
+                    Штрихкоды
+                </a>
                 <button
                     @click="emit('create')"
                     class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition"
