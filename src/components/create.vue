@@ -417,7 +417,7 @@ onUnmounted(() => {
             @pointerdown.prevent.stop="handlePointerDown"
             @pointermove="handlePointerMove"
             @pointerup="handlePointerUp"
-            class="fixed bottom-24 right-6 w-16 h-16 rounded-full bg-blue-500 hover:bg-blue-600 text-white text-3xl font-bold shadow-lg flex items-center justify-center transition touch-none select-none"
+            class="absolute bottom-24 right-6 w-16 h-16 rounded-full bg-blue-500 hover:bg-blue-600 text-white text-3xl font-bold shadow-lg flex items-center justify-center transition touch-none select-none"
             :style="backButtonStyle"
             aria-label="Назад"
         >
