@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onUnmounted } from 'vue';
+import { ref, onUnmounted, computed } from 'vue';
 import { saveBarcode } from '../barcode';
 
 const name = ref('');
@@ -12,11 +12,20 @@ const stream = ref<MediaStream | null>(null);
 const scanning = ref(false);
 const error = ref('');
 const importJson = ref('');
+const cameraAvailable = ref(true);
 
 // Проверка поддержки Barcode Detection API
 const isSupported = () => {
     return 'BarcodeDetector' in window;
 };
+
+const hasMediaDevicesSupport = () => {
+    return typeof navigator !== 'undefined' && 'mediaDevices' in navigator && typeof navigator.mediaDevices?.getUserMedia === 'function';
+};
+
+const canOpenCamera = computed(() => {
+    return isSupported() && hasMediaDevicesSupport() && cameraAvailable.value;
+});
 
 // Сканирование с камеры
 const startCamera = async () => {
@@ -24,12 +33,20 @@ const startCamera = async () => {
         error.value = '';
         if (!isSupported()) {
             error.value = 'Barcode Detection API не поддерживается в вашем браузере';
+            cameraAvailable.value = false;
+            return;
+        }
+
+        if (!hasMediaDevicesSupport()) {
+            error.value = 'Камера недоступна в вашем браузере';
+            cameraAvailable.value = false;
             return;
         }
 
         const mediaStream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: 'environment' }
         });
+        cameraAvailable.value = true;
         stream.value = mediaStream;
 
         if (videoRef.value) {
@@ -40,6 +57,7 @@ const startCamera = async () => {
         }
     } catch (err) {
         error.value = 'Не удалось получить доступ к камере';
+        cameraAvailable.value = false;
         console.error(err);
     }
 };
@@ -174,7 +192,7 @@ const importBarcode = () => {
 
     try {
         const parsed = JSON.parse(importJson.value.trim());
-        
+
         // Проверяем наличие обязательных полей
         if (typeof parsed.name !== 'string' || typeof parsed.code !== 'string' || typeof parsed.format !== 'string') {
             error.value = 'Неверный формат JSON. Ожидаются поля: name, code, format';
@@ -248,7 +266,7 @@ onUnmounted(() => {
     <div class="min-h-screen bg-gray-50">
         <!-- Заголовок -->
         <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
-            <div class="max-w-md mx-auto px-4 py-4 flex items-center gap-4">
+            <div class="w-full max-w-[600px] mx-auto px-4 py-4 flex items-center gap-4">
                 <button
                     @click="cancel"
                     class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
@@ -262,7 +280,7 @@ onUnmounted(() => {
             </div>
         </div>
 
-        <div class="max-w-md mx-auto p-4">
+        <div class="w-full max-w-[600px] mx-auto p-4">
 
             <!-- Ошибки -->
             <div v-if="error" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -310,7 +328,8 @@ onUnmounted(() => {
                     <button
                         v-if="!scanning"
                         @click="startCamera"
-                        class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition"
+                        :disabled="!canOpenCamera"
+                        class="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition"
                     >
                         Открыть камеру
                     </button>
@@ -333,7 +352,7 @@ onUnmounted(() => {
                         @change="scanFromImage"
                         class="hidden"
                     />
-                    <div class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg cursor-pointer text-center transition">
+                    <div class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg cursor-pointer text-center transition">
                         Загрузить изображение
                     </div>
                 </label>

@@ -34,10 +34,10 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50">
+    <div class="min-h-screen bg-gray-50 relative">
         <!-- Заголовок -->
         <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
-            <div class="max-w-md mx-auto px-4 py-4 flex items-center gap-4">
+            <div class="w-full max-w-[600px] mx-auto px-4 py-4 flex items-center gap-4">
                 <a
                     :href="README_URL"
                     target="_blank"
@@ -50,17 +50,11 @@ onMounted(() => {
                     </svg>
                 </a>
                 <h1 class="text-2xl font-bold text-gray-800 flex-1">Штрихкоды</h1>
-                <button
-                    @click="emit('create')"
-                    class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition"
-                >
-                    + Создать
-                </button>
             </div>
         </div>
 
         <!-- Список -->
-        <div class="max-w-md mx-auto p-4">
+        <div class="w-full max-w-[600px] mx-auto p-4">
             <div v-if="barcodes.length === 0" class="text-center py-12 text-gray-500">
                 <p class="text-lg mb-2">Нет штрихкодов</p>
                 <p class="text-sm">Создайте первый штрихкод</p>
@@ -99,6 +93,14 @@ onMounted(() => {
                 </div>
             </div>
         </div>
+
+        <button
+            @click="emit('create')"
+            class="absolute bottom-6 right-6 w-16 h-16 rounded-full bg-blue-500 hover:bg-blue-600 text-white text-3xl font-bold shadow-lg flex items-center justify-center transition"
+            aria-label="Создать"
+        >
+            +
+        </button>
     </div>
 </template>
 

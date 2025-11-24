@@ -42,8 +42,8 @@ const renderBarcode = async () => {
                 if (svgElement) {
                     // Копируем атрибуты и содержимое в существующий SVG элемент
                     barcodeSvgRef.value.setAttribute('viewBox', svgElement.getAttribute('viewBox') || '');
-                    barcodeSvgRef.value.setAttribute('width', svgElement.getAttribute('width') || '300');
-                    barcodeSvgRef.value.setAttribute('height', svgElement.getAttribute('height') || '300');
+                    barcodeSvgRef.value.setAttribute('width', '100%');
+                    barcodeSvgRef.value.removeAttribute('height');
                     barcodeSvgRef.value.innerHTML = svgElement.innerHTML;
                 }
             } else {
@@ -51,12 +51,17 @@ const renderBarcode = async () => {
                 JsBarcode(barcodeSvgRef.value, props.barcode.code, {
                     format: mapFormat(props.barcode.format),
                     width: 2,
-                    height: 80,
+                    height: 120,
                     displayValue: true,
-                    fontSize: 14,
+                    fontSize: 16,
                     margin: 10,
                 });
             }
+            barcodeSvgRef.value.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            barcodeSvgRef.value.setAttribute('width', '100%');
+            barcodeSvgRef.value.removeAttribute('height');
+            barcodeSvgRef.value.style.width = '100%';
+            barcodeSvgRef.value.style.height = 'auto';
         } catch (err) {
             console.error('Ошибка рендеринга штрихкода:', err);
         }
@@ -262,8 +267,8 @@ watch(() => props.barcode, () => {
         </div>
 
         <!-- Штрихкод -->
-        <div class="bg-white p-4 rounded-lg border border-gray-200 flex justify-center">
-            <svg ref="barcodeSvgRef" class="max-w-full h-auto"></svg>
+        <div class="bg-white p-4 rounded-lg border border-gray-200">
+            <svg ref="barcodeSvgRef" class="w-full h-auto block"></svg>
         </div>
 
         <!-- Информация -->
