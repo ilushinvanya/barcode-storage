@@ -96,7 +96,7 @@ onMounted(() => {
 
         <button
             @click="emit('create')"
-            class="absolute bottom-6 right-6 w-16 h-16 rounded-full bg-blue-500 hover:bg-blue-600 text-white text-3xl font-bold shadow-lg flex items-center justify-center transition"
+            class="absolute bottom-16 right-16 w-16 h-16 rounded-full bg-blue-500 hover:bg-blue-600 text-white text-3xl font-bold shadow-lg flex items-center justify-center transition"
             aria-label="Создать"
         >
             +
