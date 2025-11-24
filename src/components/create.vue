@@ -290,15 +290,15 @@ onUnmounted(() => {
         <!-- Заголовок -->
         <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
             <div class="w-full max-w-[600px] mx-auto px-4 py-4 flex items-center gap-4">
-                <button
-                    @click="cancel"
-                    class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
-                    title="Назад"
-                >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
+<!--                <button-->
+<!--                    @click="cancel"-->
+<!--                    class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"-->
+<!--                    title="Назад"-->
+<!--                >-->
+<!--                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">-->
+<!--                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />-->
+<!--                    </svg>-->
+<!--                </button>-->
                 <h1 class="text-2xl font-bold text-gray-800 flex-1">Создать штрихкод</h1>
             </div>
         </div>
