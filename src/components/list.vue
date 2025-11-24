@@ -43,6 +43,7 @@ const emit = defineEmits<{
 }>();
 
 const handleCreateClick = () => {
+	console.log('allowClick()', allowClick())
     if (!allowClick()) {
         return;
     }
