@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { loadBarcodes } from '../barcode';
 import type { Barcode } from '../barcode';
 import Item from './item.vue';
+import { useDraggableFloatingAction } from '../composables/useDraggableFloatingAction';
+import { CREATE_BUTTON_POSITION_KEY } from '../constants';
 
 // URL репозитория GitHub (можно настроить через переменную окружения)
 const GITHUB_REPO_URL = import.meta.env.VITE_GITHUB_REPO_URL || 'https://github.com/ilushinvanya/barcode-storage';
@@ -10,6 +12,18 @@ const README_URL = `${GITHUB_REPO_URL}/blob/main/README.md`;
 
 const barcodes = ref<Barcode[]>([]);
 const selectedBarcodeId = ref<string | null>(null);
+
+const {
+    containerRef,
+    elementRef: createButtonRef,
+    style: createButtonStyle,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+    allowClick,
+} = useDraggableFloatingAction({
+    storageKey: CREATE_BUTTON_POSITION_KEY,
+});
 
 const load = () => {
     barcodes.value = loadBarcodes();
@@ -28,13 +42,21 @@ const emit = defineEmits<{
     create: [];
 }>();
 
+const handleCreateClick = () => {
+    if (!allowClick()) {
+        return;
+    }
+
+    emit('create');
+};
+
 onMounted(() => {
     load();
 });
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 relative">
+    <div ref="containerRef" class="min-h-screen bg-gray-50 relative">
         <!-- Заголовок -->
         <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
             <div class="w-full max-w-[600px] mx-auto px-4 py-4 flex items-center gap-4">
@@ -95,8 +117,13 @@ onMounted(() => {
         </div>
 
         <button
-            @click="emit('create')"
-            class="absolute bottom-24 right-6 w-16 h-16 rounded-full bg-blue-500 hover:bg-blue-600 text-white text-3xl font-bold shadow-lg flex items-center justify-center transition"
+            ref="createButtonRef"
+            @click="handleCreateClick"
+            @pointerdown.prevent.stop="handlePointerDown"
+            @pointermove="handlePointerMove"
+            @pointerup="handlePointerUp"
+            class="absolute bottom-24 right-6 w-16 h-16 rounded-full bg-blue-500 hover:bg-blue-600 text-white text-3xl font-bold shadow-lg flex items-center justify-center transition touch-none select-none"
+            :style="createButtonStyle"
             aria-label="Создать"
         >
             +

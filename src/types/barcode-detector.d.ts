@@ -19,8 +19,3 @@ declare class BarcodeDetector {
 interface Window {
     BarcodeDetector: typeof BarcodeDetector;
 }
-
-
-
-
-
