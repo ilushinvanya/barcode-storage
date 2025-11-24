@@ -272,6 +272,7 @@ const cancel = () => {
 };
 
 const handleBackClick = () => {
+	allowClick()
     if (!allowClick()) {
         return;
     }

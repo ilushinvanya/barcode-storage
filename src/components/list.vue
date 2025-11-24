@@ -120,7 +120,7 @@ onMounted(() => {
         <button
             ref="createButtonRef"
             @click="handleCreateClick"
-            @pointerdown.stop="handlePointerDown"
+            @pointerdown.prevent.stop="handlePointerDown"
             @pointermove="handlePointerMove"
             @pointerup="handlePointerUp"
             class="absolute bottom-24 right-6 w-16 h-16 rounded-full bg-blue-500 hover:bg-blue-600 text-white text-3xl font-bold shadow-lg flex items-center justify-center transition touch-none select-none"
