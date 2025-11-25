@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onUnmounted, computed } from 'vue';
 import { saveBarcode } from '../barcode';
-import { CREATE_BUTTON_POSITION_KEY } from '../constants';
 
 const name = ref('');
 const code = ref('');
