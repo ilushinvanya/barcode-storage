@@ -21,7 +21,7 @@ const renderBarcode = async () => {
         try {
             // Очистка предыдущего содержимого
             barcodeSvgRef.value.innerHTML = '';
-            
+
             // Проверяем, является ли формат QR кодом
             const format = props.barcode.format.toLowerCase();
             if (format === 'qr_code') {
@@ -214,7 +214,7 @@ watch(() => props.barcode, () => {
                 <div class="flex gap-2">
                     <button
                         @click="handleExport"
-                        class="p-2 text-green-600 hover:bg-green-50 rounded transition"
+                        class="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded transition"
                         title="Экспорт"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,7 +223,7 @@ watch(() => props.barcode, () => {
                     </button>
                     <button
                         @click="startEdit"
-                        class="p-2 text-blue-600 hover:bg-blue-50 rounded transition"
+                        class="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded transition"
                         title="Редактировать"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,7 +232,7 @@ watch(() => props.barcode, () => {
                     </button>
                     <button
                         @click="handleDelete"
-                        class="p-2 text-red-600 hover:bg-red-50 rounded transition"
+                        class="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded transition"
                         title="Удалить"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

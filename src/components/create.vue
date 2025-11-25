@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onUnmounted, computed } from 'vue';
 import { saveBarcode } from '../barcode';
-import { useDraggableFloatingAction } from '../composables/useDraggableFloatingAction';
 import { CREATE_BUTTON_POSITION_KEY } from '../constants';
 
 const name = ref('');
@@ -249,18 +248,6 @@ const save = () => {
     }
 };
 
-const {
-    containerRef,
-    elementRef: backButtonRef,
-    style: backButtonStyle,
-    handlePointerDown,
-    handlePointerMove,
-    handlePointerUp,
-    allowClick,
-} = useDraggableFloatingAction({
-    storageKey: CREATE_BUTTON_POSITION_KEY,
-});
-
 const emit = defineEmits<{
     saved: [];
     cancel: [];
@@ -269,15 +256,6 @@ const emit = defineEmits<{
 const cancel = () => {
     stopCamera();
     emit('cancel');
-};
-
-const handleBackClick = () => {
-	allowClick()
-    if (!allowClick()) {
-        return;
-    }
-
-    cancel();
 };
 
 onUnmounted(() => {
@@ -289,17 +267,18 @@ onUnmounted(() => {
     <div ref="containerRef" class="min-h-screen bg-gray-50 relative">
         <!-- Заголовок -->
         <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
-            <div class="w-full max-w-[600px] mx-auto px-4 py-4 flex items-center gap-4">
-<!--                <button-->
-<!--                    @click="cancel"-->
-<!--                    class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"-->
-<!--                    title="Назад"-->
-<!--                >-->
-<!--                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">-->
-<!--                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />-->
-<!--                    </svg>-->
-<!--                </button>-->
+            <div class="w-full max-w-[600px] mx-auto px-4 py-4 flex items-center justify-between gap-4">
                 <h1 class="text-2xl font-bold text-gray-800 flex-1">Создать штрихкод</h1>
+				<button
+					@click="cancel"
+					class="p-2 pr-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition flex"
+					title="Назад"
+				>
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+					</svg>
+					<span>Назад</span>
+				</button>
             </div>
         </div>
 
@@ -411,20 +390,6 @@ onUnmounted(() => {
                 Сохранить
             </button>
         </div>
-        <button
-            ref="backButtonRef"
-            @click="handleBackClick"
-            @pointerdown.prevent.stop="handlePointerDown"
-            @pointermove="handlePointerMove"
-            @pointerup="handlePointerUp"
-            class="absolute bottom-24 right-6 w-16 h-16 rounded-full bg-blue-500 hover:bg-blue-600 text-white text-3xl font-bold shadow-lg flex items-center justify-center transition touch-none select-none"
-            :style="backButtonStyle"
-            aria-label="Назад"
-        >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-        </button>
     </div>
 </template>
 
