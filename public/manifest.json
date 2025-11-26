@@ -2,7 +2,7 @@
   "name": "Штрихкоды",
   "short_name": "Штрихкоды",
   "description": "Приложение для хранения и управления штрихкодами",
-  "start_url": "/",
+  "start_url": "/barcode-storage/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3b82f6",

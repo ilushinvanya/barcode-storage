@@ -6,7 +6,7 @@ import App from './App.vue'
 if ('serviceWorker' in navigator) {
   let refreshing = false;
 
-  navigator.serviceWorker.register('/sw.js')
+  navigator.serviceWorker.register('/barcode-storage/sw.js')
     .then((registration) => {
       console.log('[Service Worker] Registered successfully:', registration.scope);
 
