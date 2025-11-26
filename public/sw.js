@@ -1,5 +1,5 @@
 // Service Worker для кеширования приложения
-const CACHE_NAME = 'barcode-storage-v1';
+const CACHE_NAME = 'barcode-storage-v1.1';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -78,7 +78,7 @@ self.addEventListener('fetch', (event) => {
           })
           .catch(() => {
             // Если запрос не удался и это запрос документа, возвращаем index.html
-            if (event.request.destination === 'document' || 
+            if (event.request.destination === 'document' ||
                 (event.request.mode === 'navigate' && event.request.url.indexOf('http') === 0)) {
               return caches.match('/index.html');
             }
