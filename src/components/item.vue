@@ -2,7 +2,7 @@
 import { ref, onMounted, watch, nextTick } from 'vue';
 import JsBarcode from 'jsbarcode';
 import QRCode from 'qrcode';
-import { editBarcode, deleteBarcode } from '../barcode';
+import { editBarcode, deleteBarcode, moveBarcodeUp, moveBarcodeDown } from '../barcode';
 import type { Barcode } from '../barcode';
 
 const props = defineProps<{
@@ -181,9 +181,24 @@ const handleExport = async () => {
     }
 };
 
+const handleMoveUp = () => {
+    const success = moveBarcodeUp(props.barcode.id);
+    if (success) {
+        emit('moved');
+    }
+};
+
+const handleMoveDown = () => {
+    const success = moveBarcodeDown(props.barcode.id);
+    if (success) {
+        emit('moved');
+    }
+};
+
 const emit = defineEmits<{
     deleted: [];
     updated: [];
+    moved: [];
 }>();
 
 onMounted(() => {
@@ -207,11 +222,30 @@ watch(() => props.barcode, () => {
             {{ successMessage }}
         </div>
 
-        <!-- Название -->
+        <!-- Кнопки управления -->
         <div class="mb-4">
-            <div v-if="!isEditing" class="flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-800">{{ barcode.name }}</h3>
-                <div class="flex gap-2">
+            <div v-if="!isEditing" class="flex justify-between">
+                <div class="flex items-center gap-2">
+                    <button
+                        @click="handleMoveUp"
+                        class="p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded transition"
+                        title="Переместить вверх"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                        </svg>
+                    </button>
+                    <button
+                        @click="handleMoveDown"
+                        class="p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded transition"
+                        title="Переместить вниз"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex items-center justify-end gap-2">
                     <button
                         @click="handleExport"
                         class="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded transition"

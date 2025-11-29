@@ -74,3 +74,29 @@ export function getBarcodeById(id: string): Barcode | null {
     return barcodes.find(b => b.id === id) || null;
 }
 
+// Переместить штрихкод вверх
+export function moveBarcodeUp(id: string): boolean {
+    const barcodes = loadBarcodes();
+    const index = barcodes.findIndex(b => b.id === id);
+    if (index === -1 || index === 0) {
+        return false; // Не найден или уже первый
+    }
+    // Меняем местами с предыдущим элементом
+    [barcodes[index - 1], barcodes[index]] = [barcodes[index], barcodes[index - 1]];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(barcodes));
+    return true;
+}
+
+// Переместить штрихкод вниз
+export function moveBarcodeDown(id: string): boolean {
+    const barcodes = loadBarcodes();
+    const index = barcodes.findIndex(b => b.id === id);
+    if (index === -1 || index === barcodes.length - 1) {
+        return false; // Не найден или уже последний
+    }
+    // Меняем местами со следующим элементом
+    [barcodes[index], barcodes[index + 1]] = [barcodes[index + 1], barcodes[index]];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(barcodes));
+    return true;
+}
+

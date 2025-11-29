@@ -97,6 +97,7 @@ onMounted(() => {
                             :barcode="barcode"
                             @deleted="handleDeleted"
                             @updated="load"
+                            @moved="load"
                         />
                     </div>
                 </div>
