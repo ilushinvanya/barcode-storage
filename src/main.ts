@@ -13,7 +13,7 @@ if ('serviceWorker' in navigator) {
       // Проверка обновлений каждые 60 секунд
       setTimeout(() => {
         registration.update();
-      }, 1000);
+      }, 10000);
 
       // Обработка обновления service worker
       registration.addEventListener('updatefound', () => {
