@@ -231,12 +231,11 @@ const handleBackupFileUpload = async (event: Event) => {
         const fileContent = await file.text();
         const result = importBackup(fileContent);
 
-        // Формируем сообщение об итогах
+        // Формируем сообщение об итогах в HTML формате
         const messages: string[] = [];
 
         if (result.imported.length > 0) {
             messages.push(`✓ Импортировано ${result.imported.length} новых штрихкода`);
-            importMessageType.value = 'success';
         }
 
         if (result.duplicates.length > 0) {
@@ -248,9 +247,6 @@ const handleBackupFileUpload = async (event: Event) => {
                     messages.push(`  • "${dup.importName}" уже существует под названием "${dup.existingName}"`);
                 }
             }
-            if (result.imported.length === 0) {
-                importMessageType.value = 'warning';
-            }
         }
 
         if (result.errors.length > 0) {
@@ -258,17 +254,23 @@ const handleBackupFileUpload = async (event: Event) => {
             for (const err of result.errors) {
                 messages.push(`  • ${err}`);
             }
-            if (result.imported.length === 0) {
-                importMessageType.value = 'error';
-            }
         }
 
         importMessage.value = messages.join('\n');
 
+        // Определяем тип сообщения
+        if (result.errors.length > 0 && result.imported.length === 0) {
+            importMessageType.value = 'error';
+        } else if (result.duplicates.length > 0 && result.imported.length === 0) {
+            importMessageType.value = 'warning';
+        } else {
+            importMessageType.value = 'success';
+        }
+
         // Чистим input для возможности повторной загрузки
         input.value = '';
 
-        // Если импортировали что-то, возвращаемся к списку через 3 секунды
+        // Если импортировали что-то, возвращаемся к списку через 2 секунды
         if (result.imported.length > 0) {
             setTimeout(() => {
                 emit('saved');

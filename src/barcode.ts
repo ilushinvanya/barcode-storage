@@ -104,7 +104,10 @@ export function moveBarcodeDown(id: string): boolean {
 
 const BACKUP_CODES_KEY = 'backup_codes';
 
-// Получить список кодов, которые были забэкапены
+/**
+ * Получить список кодов, которые были забэкапены
+ * @returns {string[]} Массив кодов из последнего бэкапа
+ */
 export function getBackupCodes(): string[] {
     const stored = localStorage.getItem(BACKUP_CODES_KEY);
     if (!stored) {
@@ -117,13 +120,20 @@ export function getBackupCodes(): string[] {
     }
 }
 
-// Сохранить список кодов текущего бэкапа
+/**
+ * Сохранить список кодов текущего бэкапа
+ * @param {Barcode[]} barcodes Массив штрихкодов для бэкапа
+ */
 function saveBackupCodes(barcodes: Barcode[]): void {
     const codes = barcodes.map(b => b.code);
     localStorage.setItem(BACKUP_CODES_KEY, JSON.stringify(codes));
 }
 
-// Проверить актуален ли бэкап
+/**
+ * Проверить актуален ли бэкап
+ * Сравнивает текущий список кодов с сохранённым в бэкапе
+ * @returns {boolean} true если бэкап актуален, false если данные изменились
+ */
 export function isBackupActual(): boolean {
     const currentBarcodes = loadBarcodes();
     const backupCodes = getBackupCodes();
@@ -138,10 +148,14 @@ export function isBackupActual(): boolean {
     return currentCodes.every((code, index) => code === sortedBackupCodes[index]);
 }
 
-// Экспортировать все штрихкоды в JSON и скачать
+/**
+ * Экспортировать все штрихкоды в JSON и скачать файл
+ * Автоматически сохраняет текущие коды как актуальный бэкап
+ */
 export function downloadBackup(): void {
     const barcodes = loadBarcodes();
-    const backupData = barcodes.map(({ id, ...rest }) => rest); // Исключаем id
+    // Исключаем id при экспорте, сохраняем только name, code, format
+    const backupData = barcodes.map(({ id, ...rest }) => rest);
     const jsonString = JSON.stringify(backupData, null, 2);
 
     // Сохраняем список кодов как актуальный бэкап
@@ -159,18 +173,28 @@ export function downloadBackup(): void {
     URL.revokeObjectURL(url);
 }
 
-// Интерфейс для результата импорта
+/**
+ * Результат операции импорта
+ */
 export interface ImportResult {
+    /** Успешно импортированные штрихкоды */
     imported: Barcode[];
+    /** Штрихкоды которые уже существуют (дубликаты) */
     duplicates: Array<{
         code: string;
         importName: string;
         existingName: string;
     }>;
+    /** Ошибки при импорте */
     errors: string[];
 }
 
-// Импортировать штрихкоды из JSON файла
+/**
+ * Импортировать штрихкоды из JSON файла
+ * Сверка происходит по коду штрихкода, не по названию или ID
+ * @param {string} fileContent JSON строка с массивом штрихкодов
+ * @returns {ImportResult} Результат импорта с деталями
+ */
 export function importBackup(fileContent: string): ImportResult {
     const result: ImportResult = {
         imported: [],
@@ -188,6 +212,7 @@ export function importBackup(fileContent: string): ImportResult {
         }
 
         const currentBarcodes = loadBarcodes();
+        // Создаём Map для быстрого поиска существующих кодов
         const currentCodes = new Map(currentBarcodes.map(b => [b.code, b.name]));
 
         // Обрабатываем каждый импортируемый штрихкод
@@ -201,19 +226,11 @@ export function importBackup(fileContent: string): ImportResult {
             // Проверяем наличие дубликата по коду
             const existingName = currentCodes.get(item.code);
             if (existingName) {
-                if (existingName === item.name) {
-                    result.duplicates.push({
-                        code: item.code,
-                        importName: item.name,
-                        existingName: item.name
-                    });
-                } else {
-                    result.duplicates.push({
-                        code: item.code,
-                        importName: item.name,
-                        existingName: existingName
-                    });
-                }
+                result.duplicates.push({
+                    code: item.code,
+                    importName: item.name,
+                    existingName: existingName
+                });
                 continue;
             }
 
