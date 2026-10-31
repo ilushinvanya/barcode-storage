@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onUnmounted, computed } from 'vue';
-import { saveBarcode } from '../barcode';
+import { saveBarcode, importBackup } from '../barcode';
 
 const name = ref('');
 const code = ref('');
@@ -8,11 +8,14 @@ const format = ref('');
 const videoRef = ref<HTMLVideoElement | null>(null);
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const fileInputRef = ref<HTMLInputElement | null>(null);
+const backupFileInputRef = ref<HTMLInputElement | null>(null);
 const stream = ref<MediaStream | null>(null);
 const scanning = ref(false);
 const error = ref('');
 const importJson = ref('');
 const cameraAvailable = ref(true);
+const importMessage = ref('');
+const importMessageType = ref<'success' | 'warning' | 'error'>('success');
 
 // Проверка поддержки Barcode Detection API
 const isSupported = () => {
@@ -214,6 +217,70 @@ const importBarcode = () => {
     }
 };
 
+// Обработка загрузки бэкап файла
+const handleBackupFileUpload = async (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+        return;
+    }
+
+    try {
+        importMessage.value = '';
+        const fileContent = await file.text();
+        const result = importBackup(fileContent);
+
+        // Формируем сообщение об итогах
+        const messages: string[] = [];
+
+        if (result.imported.length > 0) {
+            messages.push(`✓ Импортировано ${result.imported.length} новых штрихкода`);
+            importMessageType.value = 'success';
+        }
+
+        if (result.duplicates.length > 0) {
+            messages.push(`⚠ Обнаружено ${result.duplicates.length} дубликатов:`);
+            for (const dup of result.duplicates) {
+                if (dup.importName === dup.existingName) {
+                    messages.push(`  • "${dup.importName}" уже существует`);
+                } else {
+                    messages.push(`  • "${dup.importName}" уже существует под названием "${dup.existingName}"`);
+                }
+            }
+            if (result.imported.length === 0) {
+                importMessageType.value = 'warning';
+            }
+        }
+
+        if (result.errors.length > 0) {
+            messages.push(`✗ Ошибки:`);
+            for (const err of result.errors) {
+                messages.push(`  • ${err}`);
+            }
+            if (result.imported.length === 0) {
+                importMessageType.value = 'error';
+            }
+        }
+
+        importMessage.value = messages.join('\n');
+
+        // Чистим input для возможности повторной загрузки
+        input.value = '';
+
+        // Если импортировали что-то, возвращаемся к списку через 3 секунды
+        if (result.imported.length > 0) {
+            setTimeout(() => {
+                emit('saved');
+            }, 2000);
+        }
+    } catch (err) {
+        importMessage.value = `Ошибка при загрузке файла: ${err instanceof Error ? err.message : String(err)}`;
+        importMessageType.value = 'error';
+        (input as HTMLInputElement).value = '';
+    }
+};
+
 // Сохранение штрихкода
 const save = () => {
     if (!name.value.trim()) {
@@ -287,6 +354,40 @@ onUnmounted(() => {
             <div v-if="error" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
                 {{ error }}
             </div>
+
+            <!-- Сообщения об импорте бэкапа -->
+            <div
+                v-if="importMessage"
+                :class="[
+                    'mb-4 p-3 rounded whitespace-pre-wrap',
+                    importMessageType === 'success' ? 'bg-green-100 border border-green-400 text-green-700' :
+                    importMessageType === 'warning' ? 'bg-yellow-100 border border-yellow-400 text-yellow-700' :
+                    'bg-red-100 border border-red-400 text-red-700'
+                ]"
+            >
+                {{ importMessage }}
+            </div>
+
+            <!-- Загрузка бэкапа -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Загрузить бэкап
+                </label>
+                <label class="block">
+                    <input
+                        ref="backupFileInputRef"
+                        type="file"
+                        accept=".json"
+                        @change="handleBackupFileUpload"
+                        class="hidden"
+                    />
+                    <div class="bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-lg cursor-pointer text-center transition">
+                        Выбрать файл бэкапа
+                    </div>
+                </label>
+            </div>
+
+            <div class="text-center text-gray-600 mb-4">или</div>
 
             <!-- Импорт из JSON -->
             <div class="mb-6">
@@ -394,3 +495,4 @@ onUnmounted(() => {
 
 <style scoped>
 </style>
+
