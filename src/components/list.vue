@@ -41,7 +41,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div ref="containerRef" class="min-h-screen bg-gray-50 relative">
+    <div ref="containerRef" class="h-dvh bg-gray-50 relative">
         <!-- Заголовок -->
         <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
             <div class="w-full max-w-[600px] mx-auto px-4 py-4 flex items-center justify-between">

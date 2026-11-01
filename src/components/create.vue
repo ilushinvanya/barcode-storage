@@ -347,7 +347,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="h-screen bg-gray-50 relative flex flex-col">
+  <div class="h-dvh bg-gray-50 relative flex flex-col">
     <!-- Заголовок -->
     <div class="bg-white shadow-sm border-b border-gray-200 z-10">
       <div class="w-full max-w-[600px] mx-auto px-4 py-4 flex items-center justify-between gap-4">
