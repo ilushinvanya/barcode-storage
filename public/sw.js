@@ -1,9 +1,9 @@
 // Service Worker для кеширования приложения
-const CACHE_NAME = 'barcode-storage-v1.3';
+const CACHE_NAME = 'barcode-storage-v1.4';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/favicon.svg'
+  '/barcode-storage/',
+  '/barcode-storage/index.html',
+  '/barcode-storage/favicon.svg'
 ];
 
 // Установка Service Worker
@@ -13,15 +13,13 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[Service Worker] Caching app shell');
-        // Кешируем только основные файлы, остальное будет кешироваться при запросах
         return cache.addAll(urlsToCache.map(url => new Request(url, { cache: 'reload' })));
       })
       .catch((error) => {
         console.error('[Service Worker] Cache failed:', error);
       })
   );
-  // Принудительная активация нового service worker
-  self.skipWaiting();
+  // Не активируем немедленно, ждем сигнала от клиента
 });
 
 // Активация Service Worker
@@ -37,32 +35,69 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    }).then(() => {
+      // Немедленный контроль над всеми страницами
+      console.log('[Service Worker] Claiming clients');
+      return self.clients.claim();
     })
   );
-  // Немедленный контроль над всеми страницами
-  return self.clients.claim();
 });
 
 // Перехват запросов
 self.addEventListener('fetch', (event) => {
-  // Игнорируем запросы не-GET и внешние домены
+  // Игнорируем запросы не-GET
   if (event.request.method !== 'GET') {
     return;
   }
 
+  // Для навигационных запросов используем Network First стратегию
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Клонируем и кешируем успешный ответ
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+          return response;
+        })
+        .catch(() => {
+          // Если сеть недоступна, берем из кеша
+          return caches.match(event.request).then((cached) => {
+            return cached || caches.match('/barcode-storage/index.html');
+          });
+        })
+    );
+    return;
+  }
+
+  // Для статических ресурсов используем Cache First стратегию
   event.respondWith(
     caches.match(event.request)
       .then((cachedResponse) => {
-        // Если есть кешированный ответ, возвращаем его
         if (cachedResponse) {
+          // Возвращаем кеш, но проверяем обновления в фоне
+          fetch(event.request)
+            .then((response) => {
+              if (response && response.status === 200) {
+                caches.open(CACHE_NAME).then((cache) => {
+                  cache.put(event.request, response.clone());
+                });
+              }
+            })
+            .catch(() => {
+              // Игнорируем ошибки фоновых обновлений
+            });
+
           return cachedResponse;
         }
 
-        // Иначе загружаем из сети
+        // Если нет в кеше, загружаем из сети
         return fetch(event.request)
           .then((response) => {
             // Проверяем валидность ответа
-            if (!response || response.status !== 200 || response.type !== 'basic') {
+            if (!response || response.status !== 200) {
               return response;
             }
 
@@ -77,19 +112,19 @@ self.addEventListener('fetch', (event) => {
             return response;
           })
           .catch(() => {
-            // Если запрос не удался и это запрос документа, возвращаем index.html
-            if (event.request.destination === 'document' ||
-                (event.request.mode === 'navigate' && event.request.url.indexOf('http') === 0)) {
-              return caches.match('/index.html');
+            // Если запрос не удался и это документ, возвращаем index.html
+            if (event.request.destination === 'document') {
+              return caches.match('/barcode-storage/index.html');
             }
           });
       })
   );
 });
 
-// Обработка сообщений от клиента для обновления
+// Обработка сообщений от клиента
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[Service Worker] Received SKIP_WAITING message');
     self.skipWaiting();
   }
 });

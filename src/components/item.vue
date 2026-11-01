@@ -370,13 +370,13 @@ watch(() => props.barcode, () => {
                     <div v-if="showExportMenu" class="absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 top-full">
                         <button
                             @click="handleExportImage"
-                            class="block w-full text-left px-4 py-2 hover:bg-gray-50 text-sm text-gray-700 border-b border-gray-200 first:rounded-t-lg"
+                            class="block w-full text-left px-4 py-2 hover:bg-gray-50 text-sm text-gray-700 border-b border-gray-200 first:rounded-t-lg text-nowrap"
                         >
                             📷 Поделиться изображением
                         </button>
                         <button
                             @click="handleExportData"
-                            class="block w-full text-left px-4 py-2 hover:bg-gray-50 text-sm text-gray-700 last:rounded-b-lg"
+                            class="block w-full text-left px-4 py-2 hover:bg-gray-50 text-sm text-gray-700 last:rounded-b-lg text-nowrap"
                         >
                             📋 Поделиться данными для сайта
                         </button>
