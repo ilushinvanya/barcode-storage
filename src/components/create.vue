@@ -349,7 +349,7 @@ onUnmounted(() => {
 <template>
   <div class="h-dvh bg-gray-50 relative flex flex-col">
     <!-- Заголовок -->
-    <div class="bg-white shadow-sm border-b border-gray-200 z-10">
+    <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
       <div class="w-full max-w-[600px] mx-auto px-4 py-4 flex items-center justify-between gap-4">
         <h1 class="text-2xl font-bold text-gray-800 flex-1">Добавление штрихкода</h1>
         <button
