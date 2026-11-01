@@ -149,10 +149,10 @@ export function isBackupActual(): boolean {
 }
 
 /**
- * Экспортировать все штрихкоды в JSON и скачать файл
+ * Экспортировать все штрихкоды в JSON и поделиться или скачать файл
  * Автоматически сохраняет текущие коды как актуальный бэкап
  */
-export function downloadBackup(): void {
+export async function downloadBackup(): Promise<void> {
     const barcodes = loadBarcodes();
     // Исключаем id при экспорте, сохраняем только name, code, format
     const backupData = barcodes.map(({ id, ...rest }) => rest);
@@ -161,12 +161,31 @@ export function downloadBackup(): void {
     // Сохраняем список кодов как актуальный бэкап
     saveBackupCodes(barcodes);
 
-    // Создаём blob и скачиваем
+    const fileName = `barcodes-backup-${barcodes.length}-${new Date().toISOString().split('T')[0]}.json`;
     const blob = new Blob([jsonString], { type: 'application/json' });
+
+    // Пытаемся поделиться через Web Share API
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'application/json' })] })) {
+        try {
+            await navigator.share({
+                files: [new File([blob], fileName, { type: 'application/json' })]
+            });
+            return; // Успешно поделились, не скачиваем файл
+        } catch (shareErr) {
+            // Если пользователь отменил шаринг, продолжаем со скачиванием
+            if ((shareErr as Error).name === 'AbortError') {
+                // Пользователь отменил, скачиваем файл как обычно
+            } else {
+                console.error('Ошибка при шаринге:', shareErr);
+            }
+        }
+    }
+
+    // Fallback: скачиваем файл локально
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `barcodes-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

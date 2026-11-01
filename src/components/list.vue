@@ -26,8 +26,8 @@ const handleDeleted = () => {
     selectedBarcodeId.value = null;
 };
 
-const handleBackupClick = () => {
-    downloadBackup();
+const handleBackupClick = async () => {
+    await downloadBackup();
     load();
 };
 

@@ -1,5 +1,5 @@
 // Service Worker для кеширования приложения
-const CACHE_NAME = 'barcode-storage-v1.7';
+const CACHE_NAME = 'barcode-storage-v1.8';
 const urlsToCache = [
   '/barcode-storage/',
   '/barcode-storage/index.html',

@@ -214,17 +214,27 @@ const importBarcode = () => {
       return;
     }
 
-    // Заполняем поля
-    name.value = importName;
-    code.value = importCode;
-    format.value = importFormat;
+    // Сразу сохраняем штрихкод
+    saveBarcode({
+      name: importName,
+      code: importCode,
+      format: importFormat,
+    });
+
+    // Очищаем форму
+    name.value = '';
+    code.value = '';
+    format.value = '';
     importJson.value = '';
-    jsonImportMessage.value = 'Штрихкод успешно импортирован';
-    jsonImportMessageType.value = 'success';
     error.value = '';
 
-    // Прокручиваем к форме для просмотра импортированных данных
-    window.scrollTo({top: 0, behavior: 'smooth'});
+    jsonImportMessage.value = 'Штрихкод успешно импортирован и сохранён';
+    jsonImportMessageType.value = 'success';
+
+    // Возвращаемся к списку через 1.5 секунды
+    setTimeout(() => {
+      emit('saved');
+    }, 5000);
   } catch (err) {
     jsonImportMessage.value = 'Ошибка при обработке данных. Проверьте формат';
     jsonImportMessageType.value = 'error';
@@ -272,26 +282,22 @@ const handleBackupFileUpload = async (event: Event) => {
       }
     }
 
-    importMessage.value = messages.join('\n');
+    // Показываем сообщение только если есть что показать
+    if (messages.length > 0) {
+      importMessage.value = messages.join('\n');
 
-    // Определяем тип сообщения
-    if (result.errors.length > 0 && result.imported.length === 0) {
-      importMessageType.value = 'error';
-    } else if (result.duplicates.length > 0 && result.imported.length === 0 && result.existingCount > 0) {
-      importMessageType.value = 'warning';
-    } else {
-      importMessageType.value = 'success';
+      // Определяем тип сообщения
+      if (result.errors.length > 0 && result.imported.length === 0) {
+        importMessageType.value = 'error';
+      } else if (result.duplicates.length > 0 && result.imported.length === 0 && result.existingCount > 0) {
+        importMessageType.value = 'warning';
+      } else {
+        importMessageType.value = 'success';
+      }
     }
 
     // Чистим input для возможности повторной загрузки
     input.value = '';
-
-    // Если импортировали что-то, возвращаемся к списку через 5 секунд (больше времени на прочтение)
-    if (result.imported.length > 0) {
-      setTimeout(() => {
-        emit('saved');
-      }, 5000);
-    }
   } catch (err) {
     importMessage.value = `Ошибка при загрузке файла: ${err instanceof Error ? err.message : String(err)}`;
     importMessageType.value = 'error';
