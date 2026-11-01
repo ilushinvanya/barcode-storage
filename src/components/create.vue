@@ -253,7 +253,8 @@ const handleBackupFileUpload = async (event: Event) => {
       messages.push(`✓ Импортировано ${result.imported.length} новых штрихкода`);
     }
 
-    if (result.duplicates.length > 0) {
+    // Показываем дубликаты только если до импорта были записи (existingCount > 0)
+    if (result.duplicates.length > 0 && result.existingCount > 0) {
       messages.push(`⚠ Обнаружено ${result.duplicates.length} дубликатов:`);
       for (const dup of result.duplicates) {
         if (dup.importName === dup.existingName) {
@@ -276,7 +277,7 @@ const handleBackupFileUpload = async (event: Event) => {
     // Определяем тип сообщения
     if (result.errors.length > 0 && result.imported.length === 0) {
       importMessageType.value = 'error';
-    } else if (result.duplicates.length > 0 && result.imported.length === 0) {
+    } else if (result.duplicates.length > 0 && result.imported.length === 0 && result.existingCount > 0) {
       importMessageType.value = 'warning';
     } else {
       importMessageType.value = 'success';
@@ -285,11 +286,11 @@ const handleBackupFileUpload = async (event: Event) => {
     // Чистим input для возможности повторной загрузки
     input.value = '';
 
-    // Если импортировали что-то, возвращаемся к списку через 2 секунды
+    // Если импортировали что-то, возвращаемся к списку через 5 секунд (больше времени на прочтение)
     if (result.imported.length > 0) {
       setTimeout(() => {
         emit('saved');
-      }, 2000);
+      }, 5000);
     }
   } catch (err) {
     importMessage.value = `Ошибка при загрузке файла: ${err instanceof Error ? err.message : String(err)}`;

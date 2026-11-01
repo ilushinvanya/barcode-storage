@@ -130,7 +130,6 @@ const handleExport = async () => {
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: `Штрихкод: ${props.barcode.name}`,
                     text: exportData
                 });
                 return;
@@ -231,7 +230,6 @@ const handleExportImage = async () => {
                 if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], `barcode-${props.barcode.name}.png`, { type: 'image/png' })] })) {
                     try {
                         await navigator.share({
-                            title: `Штрихкод: ${props.barcode.name}`,
                             files: [new File([blob], `barcode-${props.barcode.name}.png`, { type: 'image/png' })]
                         });
                         return;
@@ -355,7 +353,7 @@ watch(() => props.barcode, () => {
                         </svg>
                     </button>
                 </div>
-                <div class="flex items-center justify-end gap-2 relative">
+                <div class="flex items-center justify-end gap-2">
                     <button
                         @click="showExportMenu = !showExportMenu"
                         class="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded transition"
@@ -365,22 +363,6 @@ watch(() => props.barcode, () => {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                         </svg>
                     </button>
-
-                    <!-- Меню экспорта -->
-                    <div v-if="showExportMenu" class="absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 top-full">
-                        <button
-                            @click="handleExportImage"
-                            class="block w-full text-left px-4 py-2 hover:bg-gray-50 text-sm text-gray-700 border-b border-gray-200 first:rounded-t-lg text-nowrap"
-                        >
-                            📷 Поделиться изображением
-                        </button>
-                        <button
-                            @click="handleExportData"
-                            class="block w-full text-left px-4 py-2 hover:bg-gray-50 text-sm text-gray-700 last:rounded-b-lg text-nowrap"
-                        >
-                            📋 Поделиться данными для сайта
-                        </button>
-                    </div>
 
                     <button
                         @click="startEdit"
@@ -437,8 +419,68 @@ watch(() => props.barcode, () => {
             <p><span class="font-medium">Код:</span> {{ barcode.code }}</p>
             <p><span class="font-medium">Формат:</span> {{ barcode.format }}</p>
         </div>
+
+        <!-- Выезжающий блок снизу для выбора экспорта -->
+        <div
+            v-if="showExportMenu"
+            class="fixed inset-0 z-50 flex items-end"
+            @click="showExportMenu = false"
+        >
+            <!-- Затемнение фона -->
+            <div class="absolute inset-0 bg-black bg-opacity-40 transition-opacity"></div>
+
+            <!-- Контейнер с кнопками -->
+            <div
+                class="relative w-full bg-white rounded-t-3xl shadow-2xl animate-slide-up"
+                @click.stop
+            >
+                <div class="p-6 space-y-3">
+                    <!-- Кнопка: Поделиться изображением -->
+                    <button
+                        @click="handleExportImage"
+                        class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-blue-500 hover:bg-blue-600 text-white font-medium text-lg rounded-2xl transition shadow-md active:scale-95"
+                    >
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>Поделиться изображением</span>
+                    </button>
+
+                    <!-- Кнопка: Поделиться данными -->
+                    <button
+                        @click="handleExportData"
+                        class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-green-500 hover:bg-green-600 text-white font-medium text-lg rounded-2xl transition shadow-md active:scale-95"
+                    >
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Поделиться данными</span>
+                    </button>
+
+                    <!-- Кнопка отмены -->
+                    <button
+                        @click="showExportMenu = false"
+                        class="w-full px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-lg rounded-2xl transition active:scale-95"
+                    >
+                        Отмена
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <style scoped>
+@keyframes slide-up {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+}
 </style>

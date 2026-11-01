@@ -187,6 +187,8 @@ export interface ImportResult {
     }>;
     /** Ошибки при импорте */
     errors: string[];
+    /** Количество записей до импорта */
+    existingCount: number;
 }
 
 /**
@@ -199,7 +201,8 @@ export function importBackup(fileContent: string): ImportResult {
     const result: ImportResult = {
         imported: [],
         duplicates: [],
-        errors: []
+        errors: [],
+        existingCount: 0
     };
 
     try {
@@ -212,6 +215,9 @@ export function importBackup(fileContent: string): ImportResult {
         }
 
         const currentBarcodes = loadBarcodes();
+        // Сохраняем количество записей до импорта
+        result.existingCount = currentBarcodes.length;
+
         // Создаём Map для быстрого поиска существующих кодов
         const currentCodes = new Map(currentBarcodes.map(b => [b.code, b.name]));
 
