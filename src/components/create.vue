@@ -351,7 +351,7 @@ onUnmounted(() => {
     <!-- Заголовок -->
     <div class="bg-white shadow-sm border-b border-gray-200 z-10">
       <div class="w-full max-w-[600px] mx-auto px-4 py-4 flex items-center justify-between gap-4">
-        <h1 class="text-2xl font-bold text-gray-800 flex-1">Добавить штрихкод</h1>
+        <h1 class="text-2xl font-bold text-gray-800 flex-1">Добавление штрихкода</h1>
         <button
             @click="cancel"
             class="p-2 pr-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition flex"

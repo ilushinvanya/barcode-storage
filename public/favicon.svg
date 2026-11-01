@@ -1,24 +1,63 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <!-- Фон -->
-  <rect width="64" height="64" fill="#ffffff"/>
-  
-  <!-- Вертикальный штрихкод (повернутый на 90 градусов) -->
-  <g transform="translate(32, 32) rotate(90)">
-    <!-- Линии штрихкода -->
-    <rect x="-20" y="-32" width="2" height="64" fill="#111827"/>
-    <rect x="-17" y="-32" width="1" height="64" fill="#111827"/>
-    <rect x="-15" y="-32" width="2.5" height="64" fill="#111827"/>
-    <rect x="-11.5" y="-32" width="1" height="64" fill="#111827"/>
-    <rect x="-9.5" y="-32" width="2" height="64" fill="#111827"/>
-    <rect x="-6.5" y="-32" width="1" height="64" fill="#111827"/>
-    <rect x="-4.5" y="-32" width="2.5" height="64" fill="#111827"/>
-    <rect x="-1" y="-32" width="1" height="64" fill="#111827"/>
-    <rect x="1" y="-32" width="2" height="64" fill="#111827"/>
-    <rect x="4" y="-32" width="1" height="64" fill="#111827"/>
-    <rect x="6" y="-32" width="2.5" height="64" fill="#111827"/>
-    <rect x="9.5" y="-32" width="1" height="64" fill="#111827"/>
-    <rect x="12" y="-32" width="2" height="64" fill="#111827"/>
-    <rect x="15" y="-32" width="1.5" height="64" fill="#111827"/>
-    <rect x="17.5" y="-32" width="2" height="64" fill="#111827"/>
-  </g>
+  <!-- Paul Smith inspired vertical stripes (barcode style) -->
+
+  <!-- Черная полоса -->
+  <rect x="0" y="0" width="5" height="64" fill="#000000"/>
+
+  <!-- Розовое пространство -->
+  <rect x="5" y="0" width="2" height="64" fill="#FF69B4"/>
+
+  <!-- Черная полоса -->
+  <rect x="7" y="0" width="4" height="64" fill="#000000"/>
+
+  <!-- Желтое пространство -->
+  <rect x="11" y="0" width="1" height="64" fill="#FFD700"/>
+
+  <!-- Черная полоса -->
+  <rect x="12" y="0" width="3" height="64" fill="#000000"/>
+
+  <!-- Голубое пространство -->
+  <rect x="15" y="0" width="2" height="64" fill="#00CED1"/>
+
+  <!-- Черная полоса -->
+  <rect x="17" y="0" width="6" height="64" fill="#000000"/>
+
+  <!-- Оранжевое пространство -->
+  <rect x="23" y="0" width="3" height="64" fill="#FF8C00"/>
+
+  <!-- Черная полоса -->
+  <rect x="26" y="0" width="3.5" height="64" fill="#000000"/>
+
+  <!-- Пурпурное пространство -->
+  <rect x="29.5" y="0" width="1" height="64" fill="#9370DB"/>
+
+  <!-- Черная полоса -->
+  <rect x="30.5" y="0" width="5" height="64" fill="#000000"/>
+
+  <!-- Зеленое пространство -->
+  <rect x="35.5" y="0" width="2" height="64" fill="#32CD32"/>
+
+  <!-- Черная полоса -->
+  <rect x="37.5" y="0" width="4" height="64" fill="#000000"/>
+
+  <!-- Красное пространство -->
+  <rect x="41.5" y="0" width="1" height="64" fill="#FF4500"/>
+
+  <!-- Черная полоса -->
+  <rect x="42.5" y="0" width="6" height="64" fill="#000000"/>
+
+  <!-- Синее пространство -->
+  <rect x="48.5" y="0" width="3" height="64" fill="#1E90FF"/>
+
+  <!-- Черная полоса -->
+  <rect x="51.5" y="0" width="3" height="64" fill="#000000"/>
+
+  <!-- Желто-зеленое пространство -->
+  <rect x="54.5" y="0" width="3" height="64" fill="#ADFF2F"/>
+
+  <!-- Черная полоса -->
+  <rect x="57.5" y="0" width="4.5" height="64" fill="#000000"/>
+
+  <!-- Фиолетовое пространство -->
+  <rect x="62" y="0" width="2" height="64" fill="#DA70D6"/>
 </svg>
