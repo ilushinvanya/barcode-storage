@@ -64,7 +64,7 @@ onMounted(() => {
 					class="p-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition flex"
 					title="Назад"
 				>
-					+ Создать
+					+ Добавить
 				</button>
             </div>
         </div>

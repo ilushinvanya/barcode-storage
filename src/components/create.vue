@@ -16,6 +16,8 @@ const importJson = ref('');
 const cameraAvailable = ref(true);
 const importMessage = ref('');
 const importMessageType = ref<'success' | 'warning' | 'error'>('success');
+const jsonImportMessage = ref('');
+const jsonImportMessageType = ref<'success' | 'warning' | 'error'>('success');
 
 // Проверка поддержки Barcode Detection API
 const isSupported = () => {
@@ -186,33 +188,46 @@ const scanFromImage = async (event: Event) => {
   }
 };
 
-// Импорт штрихкода из JSON
+// Импорт штрихкода из текста
 const importBarcode = () => {
   if (!importJson.value.trim()) {
-    error.value = 'Вставьте JSON строку';
+    jsonImportMessage.value = 'Вставьте данные штрихкода';
+    jsonImportMessageType.value = 'error';
     return;
   }
 
   try {
-    const parsed = JSON.parse(importJson.value.trim());
+    const lines = importJson.value.trim().split('\n').map(line => line.trim());
 
-    // Проверяем наличие обязательных полей
-    if (typeof parsed.name !== 'string' || typeof parsed.code !== 'string' || typeof parsed.format !== 'string') {
-      error.value = 'Неверный формат JSON. Ожидаются поля: name, code, format';
+    // Проверяем наличие трёх строк
+    if (lines.length !== 3) {
+      jsonImportMessage.value = 'Неверный формат. Ожидается 3 строки: название, формат, код';
+      jsonImportMessageType.value = 'error';
+      return;
+    }
+
+    const [importName, importFormat, importCode] = lines;
+
+    if (!importName || !importFormat || !importCode) {
+      jsonImportMessage.value = 'Все поля должны быть заполнены';
+      jsonImportMessageType.value = 'error';
       return;
     }
 
     // Заполняем поля
-    name.value = parsed.name;
-    code.value = parsed.code;
-    format.value = parsed.format;
+    name.value = importName;
+    code.value = importCode;
+    format.value = importFormat;
     importJson.value = '';
+    jsonImportMessage.value = 'Штрихкод успешно импортирован';
+    jsonImportMessageType.value = 'success';
     error.value = '';
 
     // Прокручиваем к форме для просмотра импортированных данных
     window.scrollTo({top: 0, behavior: 'smooth'});
   } catch (err) {
-    error.value = 'Ошибка при парсинге JSON. Проверьте формат данных';
+    jsonImportMessage.value = 'Ошибка при обработке данных. Проверьте формат';
+    jsonImportMessageType.value = 'error';
     console.error('Ошибка импорта:', err);
   }
 };
@@ -332,11 +347,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="containerRef" class="min-h-screen bg-gray-50 relative">
+  <div class="h-screen bg-gray-50 relative flex flex-col">
     <!-- Заголовок -->
-    <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
+    <div class="bg-white shadow-sm border-b border-gray-200 z-10">
       <div class="w-full max-w-[600px] mx-auto px-4 py-4 flex items-center justify-between gap-4">
-        <h1 class="text-2xl font-bold text-gray-800 flex-1">Создать штрихкод</h1>
+        <h1 class="text-2xl font-bold text-gray-800 flex-1">Добавить штрихкод</h1>
         <button
             @click="cancel"
             class="p-2 pr-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition flex"
@@ -350,7 +365,8 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <div class="w-full max-w-[600px] mx-auto p-4">
+    <div class="flex-1 overflow-y-auto flex flex-col">
+      <div class="w-full max-w-[600px] mx-auto p-4 flex-1">
 
       <!-- Ошибки -->
       <div v-if="error" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -384,7 +400,7 @@ onUnmounted(() => {
           <video
               v-show="scanning"
               ref="videoRef"
-              class="w-full rounded-lg border-2 border-gray-300 bg-black"
+              class="w-full aspect-square rounded-lg border-2 border-gray-300 bg-black object-cover"
               autoplay
               playsinline
           ></video>
@@ -396,19 +412,19 @@ onUnmounted(() => {
               v-if="!scanning"
               @click="startCamera"
               :disabled="!canOpenCamera"
-              class="flex-1  bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-medium py-5 rounded-lg transition"
+              class="flex-1  bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-medium py-4 rounded-lg transition"
           >
             Открыть камеру
           </button>
           <button
               v-else
               @click="stopCamera"
-              class="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-5 rounded-lg transition"
+              class="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-4 rounded-lg transition"
           >
             Остановить камеру
           </button>
 
-          <label class="block flex-1 ">
+          <label class="block flex-1">
             <input
                 ref="fileInputRef"
                 type="file"
@@ -417,70 +433,13 @@ onUnmounted(() => {
                 class="hidden"
             />
             <div
-                class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-5 rounded-lg cursor-pointer text-center transition">
+                class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-4 rounded-lg cursor-pointer text-center transition">
               Загрузить изображение
             </div>
           </label>
         </div>
 
       </div>
-
-      <!-- Сообщения об импорте бэкапа -->
-      <div
-          v-if="importMessage"
-          :class="[
-                    'mb-4 p-3 rounded whitespace-pre-wrap',
-                    importMessageType === 'success' ? 'bg-green-100 border border-green-400 text-green-700' :
-                    importMessageType === 'warning' ? 'bg-yellow-100 border border-yellow-400 text-yellow-700' :
-                    'bg-red-100 border border-red-400 text-red-700'
-                ]"
-      >
-        {{ importMessage }}
-      </div>
-
-      <!-- Загрузка бэкапа -->
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Загрузить бэкап
-        </label>
-        <label class="block">
-          <input
-              ref="backupFileInputRef"
-              type="file"
-              accept=".json"
-              @change="handleBackupFileUpload"
-              class="hidden"
-          />
-          <div
-              class="bg-purple-500 hover:bg-purple-600 text-white font-medium py-4 rounded-lg cursor-pointer text-center transition">
-            Выбрать файл бэкапа
-          </div>
-        </label>
-      </div>
-
-      <!-- Импорт из JSON -->
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Импорт из JSON
-        </label>
-        <div class="flex gap-2">
-                    <textarea
-                        v-model="importJson"
-                        placeholder='Вставьте JSON строку: {"name":"Название","format":"qr_code","code":"123456"}'
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-mono text-sm"
-                        rows="3"
-                    ></textarea>
-          <button
-              @click="importBarcode"
-              :disabled="!importJson.trim()"
-              class="bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition whitespace-nowrap"
-          >
-            Импорт
-          </button>
-        </div>
-      </div>
-
-
 
       <!-- Кнопка сохранения -->
       <button
@@ -490,6 +449,77 @@ onUnmounted(() => {
       >
         Сохранить
       </button>
+
+      </div>
+
+      <!-- Блок с бэкапом и импортом внизу -->
+      <div class="w-full max-w-[600px] mx-auto px-4 pb-4 mt-auto">
+        <!-- Загрузка бэкапа -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Загрузить бэкап
+          </label>
+          <!-- Сообщения об импорте бэкапа -->
+          <div
+              v-if="importMessage"
+              :class="[
+                        'mb-4 p-3 rounded whitespace-pre-wrap',
+                        importMessageType === 'success' ? 'bg-green-100 border border-green-400 text-green-700' :
+                        importMessageType === 'warning' ? 'bg-yellow-100 border border-yellow-400 text-yellow-700' :
+                        'bg-red-100 border border-red-400 text-red-700'
+                    ]"
+          >
+            {{ importMessage }}
+          </div>
+          <label class="block">
+            <input
+                ref="backupFileInputRef"
+                type="file"
+                accept=".json"
+                @change="handleBackupFileUpload"
+                class="hidden"
+            />
+            <div
+                class="bg-purple-500 hover:bg-purple-600 text-white font-medium py-4 rounded-lg cursor-pointer text-center transition">
+              Выбрать файл бэкапа
+            </div>
+          </label>
+        </div>
+
+        <!-- Импорт из JSON -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Импорт из JSON
+          </label>
+          <!-- Сообщения об импорте JSON -->
+          <div
+              v-if="jsonImportMessage"
+              :class="[
+                        'mb-4 p-3 rounded whitespace-pre-wrap',
+                        jsonImportMessageType === 'success' ? 'bg-green-100 border border-green-400 text-green-700' :
+                        jsonImportMessageType === 'warning' ? 'bg-yellow-100 border border-yellow-400 text-yellow-700' :
+                        'bg-red-100 border border-red-400 text-red-700'
+                    ]"
+          >
+            {{ jsonImportMessage }}
+          </div>
+          <div class="flex gap-2">
+                      <textarea
+                          v-model="importJson"
+                          placeholder="Вставьте данные штрихкода (3 строки):&#10;Название&#10;qr_code&#10;123456"
+                          class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-mono text-sm"
+                          rows="3"
+                      ></textarea>
+            <button
+                @click="importBarcode"
+                :disabled="!importJson.trim()"
+                class="bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition whitespace-nowrap"
+            >
+              Импорт
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
